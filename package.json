@@ -4,8 +4,9 @@
   "description": "Sage Flashcards and Web Blocker Tool",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "rimraf dist && tsc",
+    "start": "parcel watch src/manifest.json --host localhost",
+    "build": "parcel build manifest.json",
+    "clean": "rimraf dist",
     "start:firefox": "yarn install && yarn build && web-ext run --firefox=firefoxdeveloperedition",
     "start:chrome": "yarn install && yarn build && web-ext run --target=chromium"
   },
@@ -17,10 +18,13 @@
     "typescript": "^5.4.2"
   },
   "devDependencies": {
+    "@parcel/config-webextension": "^2.12.0",
     "@types/node": "^20.11.28",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "eslint": "^8.57.0",
+    "parcel": "^2.12.0",
+    "parcel-reporter-clean-dist": "^1.0.4",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "web-ext": "^7.11.0"
