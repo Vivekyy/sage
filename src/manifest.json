@@ -14,14 +14,14 @@
       "32": "images/icon-32.png"
     },
     "default_title": "Sage",
-    "default_popup": "popup.html"
+    "default_popup": "login_popup.html"
   },
   "background": {
     "scripts": ["scripts/background.ts"],
     "persistent": true
   },
   "options_ui": {
-    "page": "login.html",
+    "page": "options.html",
     "browser_style": false,
     "chrome_style": false,
     "open_in_tab": true
