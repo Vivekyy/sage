@@ -348,7 +348,7 @@
     "@parcel/transformer-raw" "2.12.0"
     "@parcel/transformer-webextension" "2.12.0"
 
-"@parcel/core@2.12.0":
+"@parcel/core@2.12.0", "@parcel/core@^2.12.0":
   version "2.12.0"
   resolved "https://registry.yarnpkg.com/@parcel/core/-/core-2.12.0.tgz#ea5734f008300bc57aaff2ba0f7949724c93b56d"
   integrity sha512-s+6pwEj+GfKf7vqGUzN9iSEPueUssCCQrCBUlcAfKrJe0a22hTUCjewpB0I7lNrCIULt8dkndD+sMdOrXsRl6Q==
@@ -589,7 +589,7 @@
     "@parcel/utils" "2.12.0"
     nullthrows "^1.1.1"
 
-"@parcel/plugin@2.12.0", "@parcel/plugin@^2.0.0":
+"@parcel/plugin@2.12.0", "@parcel/plugin@^2.0.0", "@parcel/plugin@^2.0.0-beta.1":
   version "2.12.0"
   resolved "https://registry.yarnpkg.com/@parcel/plugin/-/plugin-2.12.0.tgz#3db4237e8977ef5b5378b65eaffb809d2026431a"
   integrity sha512-nc/uRA8DiMoe4neBbzV6kDndh/58a4wQuGKw5oEoIwBCHUvE2W8ZFSu7ollSXUGRzfacTt4NdY8TwS73ScWZ+g==
@@ -1115,6 +1115,36 @@
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.4.tgz#0b92dcc0cc1c81f6f306a381f28e31b1a56536e9"
   integrity sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==
+
+"@types/chrome@^0.0.263":
+  version "0.0.263"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.263.tgz#b629fb3ae67d55eb722decbef656f685cf23d5c8"
+  integrity sha512-As0vzv99ov3M6ZR7R6VzhMWFZXkPMrFrCEXXVrMN576Cm70fTkj7Df2CF+qEo170JepX50pd11cX6O4DSAtl2Q==
+  dependencies:
+    "@types/filesystem" "*"
+    "@types/har-format" "*"
+
+"@types/filesystem@*":
+  version "0.0.35"
+  resolved "https://registry.yarnpkg.com/@types/filesystem/-/filesystem-0.0.35.tgz#6d6766626083e2b397c09bdc57092827120db11d"
+  integrity sha512-1eKvCaIBdrD2mmMgy5dwh564rVvfEhZTWVQQGRNn0Nt4ZEnJ0C8oSUCzvMKRA4lGde5oEVo+q2MrTTbV/GHDCQ==
+  dependencies:
+    "@types/filewriter" "*"
+
+"@types/filewriter@*":
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.33.tgz#d9d611db9d9cd99ae4e458de420eeb64ad604ea8"
+  integrity sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g==
+
+"@types/firefox-webext-browser@^120.0.3":
+  version "120.0.3"
+  resolved "https://registry.yarnpkg.com/@types/firefox-webext-browser/-/firefox-webext-browser-120.0.3.tgz#d80f8d99a674102cd70cc3675490d4bc4771da61"
+  integrity sha512-APbBSxOvFMbKwXy/4YrEVa5Di6N0C9yl4w0WA0xzdkOrChAfPQ/KlcC8QLyhemHCHpF1CB/zHy52+oUQurViOg==
+
+"@types/har-format@*":
+  version "1.2.15"
+  resolved "https://registry.yarnpkg.com/@types/har-format/-/har-format-1.2.15.tgz#f352493638c2f89d706438a19a9eb300b493b506"
+  integrity sha512-RpQH4rXLuvTXKR0zqHq3go0RVXYv/YVqv4TnPH95VbwUxZdQlK1EtcMvQvMpDngHbt13Csh9Z4qT9AbkiQH5BA==
 
 "@types/http-cache-semantics@^4.0.2":
   version "4.0.4"
@@ -3693,6 +3723,13 @@ parcel-reporter-clean-dist@^1.0.4:
     "@parcel/plugin" "^2.0.0"
     fast-glob "^3.2.7"
 
+parcel-reporter-static-files-copy@^1.5.3:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/parcel-reporter-static-files-copy/-/parcel-reporter-static-files-copy-1.5.3.tgz#807493b7eadae9879eeb8c0d3792561cff9dea36"
+  integrity sha512-Ukq2SyJYn3GFIPCLamXuQ+2t+0j54llujjOUoRjtmVvfsuGnJDEpMznADeIoKuQDvy0jpxtWzWkQvxqI/j+U4A==
+  dependencies:
+    "@parcel/plugin" "^2.0.0-beta.1"
+
 parcel@^2.12.0:
   version "2.12.0"
   resolved "https://registry.yarnpkg.com/parcel/-/parcel-2.12.0.tgz#60529c268c2ce0754b225af835f1519da1364298"
@@ -3880,6 +3917,11 @@ prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
+
+prettier@^3.2.5:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.2.5.tgz#e52bc3090586e824964a8813b09aba6233b28368"
+  integrity sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
@@ -4722,11 +4764,6 @@ weak-lru-cache@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/weak-lru-cache/-/weak-lru-cache-1.2.2.tgz#fdbb6741f36bae9540d12f480ce8254060dccd19"
   integrity sha512-DEAoo25RfSYMuTGc9vPJzZcZullwIqRDSI9LOy+fkCJPi6hykCnfKaXTuPBDuXAUcqHXyOgFtHNp/kB2FjYHbw==
-
-web-ext-types@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/web-ext-types/-/web-ext-types-3.2.1.tgz#3edc0e3c2e8fe121d7d7e4ca0b7ee0c883cea832"
-  integrity sha512-oQZYDU3W8X867h8Jmt3129kRVKklz70db40Y6OzoTTuzOJpF/dB2KULJUf0txVPyUUXuyzV8GmT3nVvRHoG+Ew==
 
 web-ext@^7.11.0:
   version "7.11.0"

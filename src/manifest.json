@@ -8,30 +8,28 @@
     "48": "images/icon-48.png",
     "128": "images/icon-128.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "images/icon-16.png",
       "32": "images/icon-32.png"
     },
     "default_title": "Sage",
-    "default_popup": "login_popup.html"
+    "default_popup": "popup.html"
   },
   "background": {
-    "scripts": ["scripts/background.ts"],
-    "persistent": true
+    "service_worker": "scripts/background.ts",
+    "type": "module"
   },
   "options_ui": {
     "page": "options.html",
     "browser_style": false,
-    "chrome_style": false,
     "open_in_tab": true
   },
-  "permissions": [
-    "https://*/*",
-    "http://*/*",
-    "downloads",
-    "storage",
-    "webNavigation"
-  ],
-  "web_accessible_resources": ["block.html"]
+  "permissions": ["storage", "tabs"],
+  "web_accessible_resources": [
+    {
+      "resources": ["block.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

@@ -1,39 +1,80 @@
-import { Session } from './types.js';
+// Handle Blocking
+function checkSession() {
+  return new Promise((resolve) =>
+    chrome.storage.sync.get(
+      {
+        sessions: [],
+      },
+      function (value) {
+        const error = chrome.runtime.lastError;
+        if (error) {
+          console.error('Failed to get data from storage:', error);
+          resolve('fail');
+        }
 
-const sessions: Set<Session> = new Set<Session>();
-const blocks = [];
-let inSession: boolean = true;
+        for (const sesh of value.sessions) {
+          const now = new Date();
 
-function swapPopup(logged_in: boolean) {
-  if (logged_in) {
-    browser.browserAction.setPopup({ popup: 'popup.html' });
-  } else {
-    browser.browserAction.setPopup({ popup: 'login_popup.html' });
+          const start = new Date(parseInt(sesh.start));
+          start.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+          const end = new Date(parseInt(sesh.end));
+          end.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+
+          if (now >= start && now <= end) {
+            resolve('true');
+          }
+        }
+        resolve('false');
+      },
+    ),
+  );
+}
+
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  if (changeInfo.status == 'loading' && tab.url) {
+    let blocked = false;
+
+    return new Promise((resolve) =>
+      checkSession().then(function (checkSessionResponse) {
+        if (checkSessionResponse == 'true') {
+          chrome.storage.sync.get({ blocks: [] }, function (value) {
+            const error = chrome.runtime.lastError;
+            if (error) {
+              console.error('Failed to get data from storage:', error);
+              resolve({});
+            }
+
+            const curUrl = new URL(tab.url!);
+            const curDomain = curUrl.hostname.replace(/^www\./, '');
+            const curPath = curUrl.pathname;
+
+            for (const blockSite of value.blocks) {
+              const domainReg = new RegExp(blockSite.domain);
+              if (domainReg.test(curDomain)) {
+                if (!blockSite.path) {
+                  blocked = true;
+                  break;
+                } else {
+                  const pathReg = new RegExp(blockSite.path);
+                  if (pathReg.test(curPath)) {
+                    blocked = true;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (blocked) {
+              console.log('Blocking site');
+              const blockUrl = chrome.runtime.getURL('block.html');
+              chrome.tabs.update(tabId, { url: blockUrl });
+            }
+          });
+        }
+      }),
+    );
   }
-}
+});
 
-function checkSession(): boolean {
-  const datetime = new Date();
-  for (const sesh of sessions) {
-    if (datetime >= sesh.start && datetime <= sesh.end) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function addSession(start: Date, end: Date) {
-  const sesh: Session = { start: start, end: end };
-  sessions.add(sesh);
-  inSession = checkSession();
-}
-
-function removeSession(start: Date, end: Date) {
-  const sesh: Session = { start: start, end: end };
-  sessions.delete(sesh);
-  inSession = checkSession();
-}
-
-function block();
-
-browser.webNavigation.onCommitted.addListener(block);
+// Handle Login
+// TODO

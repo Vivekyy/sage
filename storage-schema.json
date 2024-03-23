@@ -1,0 +1,31 @@
+{
+  "description": "Schema for Sage Browser Storage",
+  "type": "object",
+  "properties": {
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "Date" },
+          "end": { "type": "Date" }
+        },
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}
