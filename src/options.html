@@ -3,59 +3,101 @@
   <head>
     <title>Options</title>
 
-    <link rel="stylesheet" href="styles/bulma.css" />
+    <link rel="stylesheet" href="styles/tailwind.css" />
   </head>
   <body>
-    <h1>Options</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>Start</th>
-          <th>End</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="session-table">
-        <tr>
-          <td>
-            <input id="start-time-input" type="time" />
-            <p id="start-time-error" class="help is-danger"></p>
-          </td>
-          <td>
-            <input id="end-time-input" type="time" />
-            <p id="end-time-error" class="help is-danger"></p>
-          </td>
-          <td>
-            <a id="session-add-button" class="button is-success">Add</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <thead>
-        <tr>
-          <th>Domain</th>
-          <th>Path</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="block-table">
-        <tr>
-          <td>
-            <input id="domain-input" type="text" />
-            <p id="domain-error" class="help is-danger"></p>
-          </td>
-          <td>
-            <input id="path-input" type="text" />
-            <p id="path-error" class="help is-danger"></p>
-          </td>
-          <td>
-            <a id="block-add-button" class="button is-success">Add</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p id="general-error" class="help is-danger"></p>
+    <nav class="bg-white w-full z-20 top-0 start-0 border-b border-gray-300">
+      <img src="images/sage-logo-dark-horizontal.png" class="h-12 m-2 inline" />
+      <span class="text-xl text-center align-bottom font-semibold">Web-Extension Options</span>
+    </nav>
+
+    <p id="general-error" class="text-red-600"></p>
+
+    <div class="w-screen flex text-2xl justify-center mt-8">
+      <span class="m-2">Scheduled Study Sessions</span>
+    </div>
+
+    <div class="w-screen flex justify-center">
+      <div class="rounded-md overflow-hidden">
+        <table class="text-sm text-left w-80">
+          <thead class="text-gray-800 bg-gray-500">
+            <tr>
+              <th class="px-6 py-2">Start</th>
+              <th class="px-6 py-2">End</th>
+              <th class="px-6 py-2"></th>
+            </tr>
+          </thead>
+          <tbody id="session-table" class="bg-gray-200">
+            <tr>
+              <td class="px-6 py-4 font-sans font-normal">
+                <input id="start-time-input" type="time" class="bg-gray-200" />
+                <p id="start-time-error" class="text-red-600"></p>
+              </td>
+              <td class="px-6 py-4 font-sans font-normal">
+                <input id="end-time-input" type="time" class="bg-gray-200" />
+                <p id="end-time-error" class="text-red-600"></p>
+              </td>
+              <td class="px-6 py-4">
+                <a id="session-add-button">
+                  <div class="flex bg-green-400 hover:bg-green-500 text-white font-semibold py-1 px-3 rounded-full">
+                    <span>Add</span>
+                    <!-- <div class="align-middle"><i class="fa-solid fa-plus"></i></div> -->
+                  </div>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="w-screen flex text-2xl justify-center mt-8">
+      <span class="m-2">Blocked Sites</span>
+    </div>
+
+    <div class="w-screen flex justify-center">
+      <div class="rounded-md overflow-hidden">
+        <table class="text-sm text-left w-96 font-sans font-normal">
+          <thead class="text-gray-800 bg-gray-500">
+            <tr>
+              <th class="px-6 py-2">Domain</th>
+              <th class="px-6 py-2">Path (Optional)</th>
+              <th class="px-6 py-2"></th>
+            </tr>
+          </thead>
+          <tbody id="block-table" class="bg-gray-200">
+            <tr>
+              <td class="px-6 py-4">
+                <input
+                  id="domain-input"
+                  type="text"
+                  class="bg-gray-100 p-2 border-b-2 border-gray-500 rounded-sm"
+                  placeholder="e.g. youtube.com"
+                />
+                <p id="domain-error" class="text-red-600"></p>
+              </td>
+              <td class="px-6 py-4">
+                <input
+                  id="path-input"
+                  type="text"
+                  class="bg-gray-100 p-2 border-b-2 border-gray-500 rounded-sm"
+                  placeholder="e.g. /playlist"
+                />
+                <p id="path-error" class="text-red-600"></p>
+              </td>
+              <td class="px-6 py-4">
+                <a id="block-add-button">
+                  <div class="flex bg-green-400 hover:bg-green-500 text-white font-semibold py-1 px-3 rounded-full">
+                    <span>Add</span>
+                    <!-- <div class="align-middle"><i class="fa-solid fa-plus"></i></div> -->
+                  </div>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
     <script src="scripts/options.ts" type="module"></script>
   </body>
 </html>

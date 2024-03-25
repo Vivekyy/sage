@@ -1,3 +1,5 @@
+import '@fortawesome/fontawesome-free/css/all.css';
+
 import { BlockSite, Session } from './types';
 
 let blocks: BlockSite[] = [];
@@ -63,31 +65,49 @@ function addBlockUI(block: BlockSite) {
   console.log('Adding block row');
   const tbody = document.querySelector('#block-table') as HTMLTableElement;
   const row = tbody.insertRow(0);
+  row.className = 'border-b border-gray-500';
+
   const c1 = row.insertCell();
   const c2 = row.insertCell();
   const c3 = row.insertCell();
 
   const favicon = document.createElement('img');
   favicon.setAttribute('src', 'http://www.google.com/s2/favicons?domain=' + block.domain);
-  c1.appendChild(favicon);
+  favicon.className = 'mr-2';
 
   const span = document.createElement('span');
-  span.textContent = '     ' + block.domain;
-  c1.appendChild(span);
+  span.textContent = block.domain;
+  span.className = 'underline hover:text-gray-700';
+
+  const c1Div = document.createElement('div');
+  c1Div.className = 'flex px-6 py-4';
+  c1Div.appendChild(favicon);
+  c1Div.appendChild(span);
+  c1.appendChild(c1Div);
 
   c2.textContent = block.path;
+  c2.className = 'px-6 py-4';
 
   const deleteButton = document.createElement('button');
   deleteButton.addEventListener('click', deleteBlockedSite);
   deleteButton.style.background = 'none';
   deleteButton.style.border = 'none';
 
-  const deleteImg = document.createElement('img');
-  deleteImg.setAttribute('src', 'static/red-trash-can-icon.png');
-  deleteButton.appendChild(deleteImg);
+  const deleteDiv = document.createElement('div');
+  deleteDiv.className = 'flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full';
+  const deleteSpan = document.createElement('span');
+  deleteSpan.textContent = 'Remove';
+
+  deleteDiv.appendChild(deleteSpan);
+  deleteButton.appendChild(deleteDiv);
 
   c3.appendChild(deleteButton);
 }
+
+// <div class="flex bg-green-400 hover:bg-green-500 text-white font-semibold py-1 px-3 rounded-full">
+//                   <span class="mr-2">Add</span>
+//                   <div class="align-middle"><i class="fa-solid fa-plus"></i></div>
+//                 </div>
 
 function deleteBlockedSite(this: HTMLButtonElement) {
   let row = this.parentNode;
@@ -128,6 +148,10 @@ function addSession() {
     return;
   }
 
+  if (start >= end) {
+    outputError('#start-time-error', 'Start time must be earlier than end time');
+  }
+
   // Fix timezone of input to local time
   start.setMinutes(start.getMinutes() + start.getTimezoneOffset());
   end.setMinutes(end.getMinutes() + end.getTimezoneOffset());
@@ -163,21 +187,30 @@ function addSessionUI(session: Session) {
   console.log('Adding session row');
   const tbody = document.querySelector('#session-table') as HTMLTableElement;
   const row = tbody.insertRow(0);
+  row.className = 'border-b border-gray-500';
+
   const c1 = row.insertCell();
   const c2 = row.insertCell();
   const c3 = row.insertCell();
 
   c1.textContent = toAMPM(session.start);
+  c1.className = 'px-6 py-4';
+
   c2.textContent = toAMPM(session.end);
+  c2.className = 'px-6 py-4';
 
   const deleteButton = document.createElement('button');
   deleteButton.addEventListener('click', deleteSession);
   deleteButton.style.background = 'none';
   deleteButton.style.border = 'none';
 
-  const deleteImg = document.createElement('img');
-  deleteImg.setAttribute('src', 'static/red-trash-can-icon.png');
-  deleteButton.appendChild(deleteImg);
+  const deleteDiv = document.createElement('div');
+  deleteDiv.className = 'flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full';
+  const deleteSpan = document.createElement('span');
+  deleteSpan.textContent = 'Remove';
+
+  deleteDiv.appendChild(deleteSpan);
+  deleteButton.appendChild(deleteDiv);
 
   c3.appendChild(deleteButton);
 }
