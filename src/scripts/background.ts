@@ -1,35 +1,6 @@
+import { checkSession } from './utils';
+
 // Handle Blocking
-function checkSession() {
-  return new Promise((resolve) =>
-    chrome.storage.sync.get(
-      {
-        sessions: [],
-      },
-      function (value) {
-        const error = chrome.runtime.lastError;
-        if (error) {
-          console.error('Failed to get data from storage:', error);
-          resolve('fail');
-        }
-
-        for (const sesh of value.sessions) {
-          const now = new Date();
-
-          const start = new Date(parseInt(sesh.start));
-          start.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
-          const end = new Date(parseInt(sesh.end));
-          end.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
-
-          if (now >= start && now <= end) {
-            resolve('true');
-          }
-        }
-        resolve('false');
-      },
-    ),
-  );
-}
-
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status == 'loading' && tab.url) {
     let blocked = false;

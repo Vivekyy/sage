@@ -23,12 +23,17 @@ function addBlockedSite() {
   domain = domain.replace(/^www\./, '');
   domain = domain.toLowerCase();
 
+  // Want: [anything].[anything] format
   if (!/.+\..+/.test(domain)) {
     outputError('#domain-error', 'Invalid domain');
     return;
   }
 
-  path = path.trim().toLowerCase();
+  path = path.trim();
+  if (path[0] != '/') {
+    path = '/' + path;
+  }
+  // Want: /[anything] format (technically possible to still fail with newlines)
   if (path && !/^\/.+/.test(path)) {
     outputError('#path-error', 'Invalid path');
     return;
@@ -103,11 +108,6 @@ function addBlockUI(block: BlockSite) {
 
   c3.appendChild(deleteButton);
 }
-
-// <div class="flex bg-green-400 hover:bg-green-500 text-white font-semibold py-1 px-3 rounded-full">
-//                   <span class="mr-2">Add</span>
-//                   <div class="align-middle"><i class="fa-solid fa-plus"></i></div>
-//                 </div>
 
 function deleteBlockedSite(this: HTMLButtonElement) {
   let row = this.parentNode;
