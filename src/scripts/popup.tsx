@@ -1,8 +1,9 @@
 import { countdown } from './utils';
 import { createRoot } from 'react-dom/client';
 
+const root = createRoot(document.getElementById('popupApp')!);
+
 function onLoad() {
-  const root = createRoot(document.getElementById('app')!);
   countdown(onLoad).then(function (countdownResponse) {
     let element;
     if (countdownResponse != 'false' && countdownResponse != 'fail') {
