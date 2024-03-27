@@ -30,7 +30,7 @@ function addBlockedSite() {
   }
 
   path = path.trim();
-  if (path[0] != '/') {
+  if (path != '' && path[0] != '/') {
     path = '/' + path;
   }
   // Want: /[anything] format (technically possible to still fail with newlines)

@@ -6,28 +6,7 @@
     <link rel="stylesheet" href="styles/tailwind.css" />
   </head>
   <body>
-    <div class="flex bg-gradient-to-r from-green-700 via-yellow-200 to-green-700 h-screen">
-      <div class="m-auto">
-        <div class="flex items-center justify-center">
-          <img src="images/sage-logo-dark.png" class="m-10" />
-        </div>
-
-        <div class="flex items-center justify-center">
-          <p id="current-session-prefix" class="m-4 text-2xl font-semibold"></p>
-        </div>
-        <div class="flex items-center justify-center">
-          <p id="current-session" class="m-4 text-3xl font-semibold"></p>
-        </div>
-        <div class="flex items-center justify-center">
-          <a
-            id="session-link"
-            href="https://www.sageflashcards.ai/"
-            class="text-lg font-semibold underline hover:text-gray-700"
-            >Return to your session</a
-          >
-        </div>
-      </div>
-    </div>
-    <script src="scripts/block.ts" type="module"></script>
+    <div id="app"></div>
+    <script src="scripts/block.tsx" type="module"></script>
   </body>
 </html>

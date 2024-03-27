@@ -2,16 +2,15 @@ import { countdown } from './utils';
 import { createRoot } from 'react-dom/client';
 
 function onLoad() {
-  const container = document.getElementById('app')!;
-  const root = createRoot(container);
+  const root = createRoot(document.getElementById('app')!);
   countdown(onLoad).then(function (countdownResponse) {
+    let element;
     if (countdownResponse != 'false' && countdownResponse != 'fail') {
-      const element = defaultPopupContent('Study Time Remaining:', countdownResponse as string);
-      root.render(element);
+      element = PopupContent('Study Time Remaining:', countdownResponse as string);
     } else {
-      const element = defaultPopupContent('No active study session', '');
-      root.render(element);
+      element = PopupContent('No active study session', '');
     }
+    root.render(element);
   });
 }
 
@@ -25,19 +24,30 @@ function fetchOptions() {
   }
 }
 
-function defaultPopupContent(prefix: string, current_session: string) {
+function PopupContent(prefix: string, current_session: string) {
   return (
     <div className="m-auto">
-      <div className="flex items-center justify-center">
-        <p className="font-medium text-lg m-2">{prefix}</p>
-      </div>
-      <div className="flex items-center justify-center">
-        <p className="font-semibold text-2xl m-2">{current_session}</p>
-      </div>
+      <TextComponent content={prefix} text_size="text-xl" />
+      <TextComponent content={current_session} text_size="text-2xl" />
       <div className="flex align-bottom justify-center h-fit">
         <button className="underline hover:text-gray-700 text-sm" onClick={() => fetchOptions()}>
           Manage your settings
         </button>
+      </div>
+    </div>
+  );
+}
+
+interface Props {
+  content: string;
+  text_size: string;
+}
+
+function TextComponent(props: Props) {
+  return (
+    <div className="flex items-center justify-center">
+      <div className="font-semibold m-2">
+        <p className={props.text_size}>{props.content}</p>
       </div>
     </div>
   );
