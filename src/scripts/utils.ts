@@ -27,7 +27,7 @@ export function checkSession() {
   );
 }
 
-export function countdown(listener: CallableFunction, sessionField: HTMLParagraphElement) {
+export function countdown(listener: CallableFunction) {
   const now = new Date();
 
   return new Promise((resolve) =>
@@ -56,8 +56,8 @@ export function countdown(listener: CallableFunction, sessionField: HTMLParagrap
           const secStr = secs < 10 ? '0' + secs.toString() : secs.toString();
           const minStr = hours && mins < 10 ? '0' + mins.toString() : mins.toString();
 
-          sessionField.textContent = hours ? hours.toString() + ':' + minStr + ':' + secStr : minStr + ':' + secStr;
-          resolve('true');
+          const sessionField = hours ? hours.toString() + ':' + minStr + ':' + secStr : minStr + ':' + secStr;
+          resolve(sessionField);
         }
       }
       resolve('false');
