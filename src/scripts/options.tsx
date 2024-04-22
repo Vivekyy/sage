@@ -1,4 +1,6 @@
 import '@fortawesome/fontawesome-free/css/all.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 import { createRoot } from 'react-dom/client';
 import React, { useState } from 'react';
@@ -33,6 +35,8 @@ function OptionsContent() {
 // -- CALENDAR --
 
 function SessionCalenderComp() {
+  const [week, setWeek] = useState(0);
+
   const seshComp = <div></div>;
 
   return (
@@ -42,14 +46,14 @@ function SessionCalenderComp() {
       </div>
 
       <div className="w-screen flex justify-center">
-        <div className="rounded-md overflow-hidden">
+        <div className="rounded-md overflow-hidden w-4/5">
           <div className="text-sm text-left font-sans font-normal">
-            <CalenderHeaderComp />
+            <CalenderHeaderComp week={week} />
 
             <div className="overflow-y-auto h-96">
               <div className="bg-gray-200">
                 <div className="grid grid-cols-8 grid-rows-auto auto-cols-min">
-                  <HourLineComp />
+                  <HourLineComp week={week} />
                   <CalendarSidebarComp />
                   {seshComp}
                 </div>
@@ -58,14 +62,33 @@ function SessionCalenderComp() {
           </div>
         </div>
       </div>
+      <div className="w-screen flex justify-center">
+        <div className="w-4/5 flex items-end">
+          <button onClick={() => setWeek(week - 1)}>
+            <div>
+              <div className="flex bg-neutral-300 hover:bg-neutral-400 py-1 px-3 rounded-full">
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </div>
+            </div>
+          </button>
+          <button onClick={() => setWeek(week + 1)}>
+            <div className="flex bg-neutral-300 hover:bg-neutral-400 py-1 px-3 rounded-full">
+              <FontAwesomeIcon icon={faChevronRight} />
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-function CalenderHeaderComp() {
+interface CalendarHeaderProps {
+  week: number;
+}
+function CalenderHeaderComp(props: CalendarHeaderProps) {
   const dt = new Date();
   const sunday = new Date();
-  sunday.setDate(dt.getDate() - dt.getDay());
+  sunday.setDate(dt.getDate() - dt.getDay() + 7 * props.week);
 
   const dow = [];
   for (let i = 1; i < 8; i++) {
@@ -147,16 +170,26 @@ function HourBlockComp(time: string, id: number) {
   );
 }
 
-interface HourLineProps {
+interface HourLinePosProps {
   offset: string;
 }
-
-const HourLinePosDiv = styled.div<HourLineProps>`
+const HourLinePosDiv = styled.div<HourLinePosProps>`
   position: relative;
   top: ${(p) => p.offset}px;
 `;
 
-function HourLineComp() {
+interface HourLineProps {
+  week: number;
+}
+function HourLineComp(props: HourLineProps) {
+  if (props.week != 0) {
+    return (
+      <div className="col-start-1 col-end-9">
+        <div className="border-gray-200 border"></div>
+      </div>
+    );
+  }
+
   const dt = new Date();
   const hr = dt.getHours();
   const min = dt.getMinutes();
@@ -165,7 +198,7 @@ function HourLineComp() {
   return (
     <div className="col-start-1 col-end-9">
       <HourLinePosDiv offset={hourLineOffset.toString()}>
-        <div className={'border-red-600 border '}></div>
+        <div className={'border-red-500 border '}></div>
       </HourLinePosDiv>
     </div>
   );

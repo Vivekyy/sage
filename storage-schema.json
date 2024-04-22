@@ -8,7 +8,12 @@
         "type": "object",
         "properties": {
           "start": { "type": "Date" },
-          "end": { "type": "Date" }
+          "end": { "type": "Date" },
+          "repeat": { "type": "number" },
+          "exceptions": {
+            "type": "array",
+            "items": { "type": "Date" }
+          }
         },
         "additionalProperties": false
       },
