@@ -7,7 +7,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
     return new Promise((resolve) =>
       checkSession().then(function (checkSessionResponse) {
-        checkSessionResponse = 'true'; //temporary
+        // checkSessionResponse = 'true'; //temporary
+        console.log(checkSessionResponse);
         if (checkSessionResponse == 'true') {
           chrome.storage.sync.get({ blocks: [] }, function (value) {
             const error = chrome.runtime.lastError;

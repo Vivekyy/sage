@@ -1,13 +1,13 @@
 import '@fortawesome/fontawesome-free/css/all.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight, faX } from '@fortawesome/free-solid-svg-icons';
 
 import { createRoot } from 'react-dom/client';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 import styled from 'styled-components';
 
-import { BlockSite } from './types';
+import { BlockSite, Session } from './types';
 
 const root = createRoot(document.getElementById('optionsApp')!);
 
@@ -35,7 +35,19 @@ function OptionsContent() {
 // -- CALENDAR --
 
 function SessionCalenderComp() {
+  const [sessions, setSessions] = useState(Array(0));
   const [week, setWeek] = useState(0);
+  const [popupBool, setPopupBool] = useState(false);
+
+  chrome.storage.sync.get({ sessions: [] }, function (value) {
+    const error = chrome.runtime.lastError;
+    if (error) {
+      console.error('Failed to get data from storage:', error);
+      outputError('#general-error', 'Failed to get data from storage, please refresh the page');
+    } else {
+      setSessions(value.sessions);
+    }
+  });
 
   const seshComp = <div></div>;
 
@@ -50,7 +62,7 @@ function SessionCalenderComp() {
           <div className="text-sm text-left font-sans font-normal">
             <CalenderHeaderComp week={week} />
 
-            <div className="overflow-y-auto h-96">
+            <div className="overflow-auto h-96">
               <div className="bg-gray-200">
                 <div className="grid grid-cols-8 grid-rows-auto auto-cols-min">
                   <HourLineComp week={week} />
@@ -62,22 +74,9 @@ function SessionCalenderComp() {
           </div>
         </div>
       </div>
-      <div className="w-screen flex justify-center">
-        <div className="w-4/5 flex items-end">
-          <button onClick={() => setWeek(week - 1)}>
-            <div>
-              <div className="flex bg-neutral-300 hover:bg-neutral-400 py-1 px-3 rounded-full">
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </div>
-            </div>
-          </button>
-          <button onClick={() => setWeek(week + 1)}>
-            <div className="flex bg-neutral-300 hover:bg-neutral-400 py-1 px-3 rounded-full">
-              <FontAwesomeIcon icon={faChevronRight} />
-            </div>
-          </button>
-        </div>
-      </div>
+      <CalendarNavComp week={week} popupBool={popupBool} setWeek={setWeek} setPopupBool={setPopupBool} />
+
+      <AddPopupComp popupBool={popupBool} setPopupBool={setPopupBool} sessions={sessions} setSessions={setSessions} />
     </div>
   );
 }
@@ -133,9 +132,9 @@ function CalendarSidebarComp() {
   for (let i = 0; i < 24; i++) {
     let post = '';
     if (i < 12) {
-      post = ' AM';
+      post = ':00 AM';
     } else {
-      post = ' PM';
+      post = ':00 PM';
     }
 
     let hr = i % 12;
@@ -148,6 +147,170 @@ function CalendarSidebarComp() {
   }
 
   return <div className="col-start-1 col-end-2 gap-8 bg-gray-400 text-gray-600">{hourBlocksComp}</div>;
+}
+
+interface CalendarNavProps {
+  week: number;
+  popupBool: boolean;
+  setWeek: React.Dispatch<React.SetStateAction<number>>;
+  setPopupBool: React.Dispatch<React.SetStateAction<boolean>>;
+}
+function CalendarNavComp(props: CalendarNavProps) {
+  return (
+    <div>
+      <div className="w-screen flex justify-center">
+        <div className="w-4/5 flex justify-between">
+          <div className="flex ml-auto">
+            <button onClick={() => props.setPopupBool(true)} className="m-1">
+              <div>
+                <div className="flex bg-blue-300 hover:bg-blue-500 py-1 px-3 rounded-full">
+                  <span className="text-gray-800 font-sans font-semibold text-sm">Add Session</span>
+                </div>
+              </div>
+            </button>
+            <div className="mr-2 mt-1">
+              <button onClick={() => props.setWeek(props.week - 1)} className="mr-0.5">
+                <div>
+                  <div className="flex bg-gray-200 hover:bg-gray-400 py-1 px-3 rounded-full">
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </div>
+                </div>
+              </button>
+              <button onClick={() => props.setWeek(props.week + 1)}>
+                <div className="flex bg-gray-200 hover:bg-gray-400 py-1 px-3 rounded-full">
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-center align-center"></div>
+    </div>
+  );
+}
+
+interface AddPopupProps {
+  sessions: Session[];
+  popupBool: boolean;
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
+  setPopupBool: React.Dispatch<React.SetStateAction<boolean>>;
+}
+function AddPopupComp(props: AddPopupProps) {
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
+  const [repeat, setRepeat] = useState('');
+
+  return (
+    <PopupComp title="Add a Study Session" popupBool={props.popupBool} setPopupBool={props.setPopupBool}>
+      <span className="whitespace-nowrap py-2">
+        <span>Session Start: </span>
+        <input
+          onChange={(e) => setStart(e.target.value)}
+          type="datetime-local"
+          className="bg-gray-300 p-2 border-b-2 border-gray-500 rounded-sm outline-none focus:bg-gray-200 mr-6"
+        />
+      </span>
+      <span className="whitespace-nowrap py-2">
+        <span>Session End: </span>
+        <input
+          onChange={(e) => setEnd(e.target.value)}
+          type="datetime-local"
+          className="bg-gray-300 p-2 border-b-2 border-gray-500 rounded-sm outline-none focus:bg-gray-200"
+        />
+      </span>
+      <div className="py-2">
+        <span>
+          Repeat Every{' '}
+          <input
+            onChange={(e) => setRepeat(e.target.value)}
+            type="number"
+            min="1"
+            className="bg-gray-300 p-2 border-b-2 w-10 border-gray-500 rounded-sm outline-none focus:bg-gray-200"
+          />{' '}
+          Days
+        </span>
+      </div>
+      <div className="pt-3">
+        <button
+          onClick={() =>
+            addSession(props.sessions, props.popupBool, start, end, repeat, props.setSessions, props.setPopupBool)
+          }
+        >
+          <div className="flex bg-blue-300 hover:bg-blue-500 py-1 px-3 rounded-full">
+            <span className="text-gray-800 font-sans font-semibold">Add to Schedule</span>
+          </div>
+        </button>
+      </div>
+      <p id="session-error" className="text-red-600"></p>
+    </PopupComp>
+  );
+}
+
+function addSession(
+  sessions: Session[],
+  popupBool: boolean,
+  startStr: string,
+  endStr: string,
+  repeatStr: string,
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+  setPopupBool: React.Dispatch<React.SetStateAction<boolean>>,
+) {
+  console.log('Adding Session');
+
+  clearErrors(['#session-error']);
+
+  if (!startStr) {
+    outputError('#session-error', 'Must input a start time');
+    return;
+  }
+  if (!endStr) {
+    outputError('#session-error', 'Must input an end time');
+    return;
+  }
+
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  // const repeat = repeatStr ? Number(repeatStr) : 0;
+
+  if (start >= end) {
+    outputError('#session-error', 'Start time must be earlier than end time');
+    return;
+  }
+
+  const newSesh: Session = {
+    start: start!.getTime().toString(),
+    end: end!.getTime().toString(),
+    repeat: repeatStr,
+    exceptions: [],
+  };
+
+  // TODO: Handle repeat logic here
+  // Enforce no overlapping sessions
+  if (
+    sessions.some(function (session) {
+      return (
+        (session.start <= newSesh.start && session.end >= newSesh.start) ||
+        (session.start <= newSesh.end && session.end >= newSesh.end)
+      );
+    })
+  ) {
+    outputError('#session-error', 'This study session overlaps with an existing session');
+    return;
+  }
+
+  const nextSessions = sessions.slice();
+  nextSessions.unshift(newSesh);
+  chrome.storage.sync.set({ sessions: nextSessions }, function () {
+    const error = chrome.runtime.lastError;
+    if (error) {
+      console.error('Failed to add blocked site:', error);
+      outputError('#domain-error', 'An unexpected error occured, please try again');
+    } else {
+      setSessions(nextSessions);
+      setPopupBool(false);
+    }
+  });
 }
 
 // -- CURRENT TIME LINE --
@@ -198,7 +361,7 @@ function HourLineComp(props: HourLineProps) {
   return (
     <div className="col-start-1 col-end-9">
       <HourLinePosDiv offset={hourLineOffset.toString()}>
-        <div className={'border-red-500 border '}></div>
+        <div className={'border-red-500 border'}></div>
       </HourLinePosDiv>
     </div>
   );
@@ -221,7 +384,7 @@ function BlockTableComp() {
     }
   });
 
-  const blocksComp = blocks.map((value) => BlockComponent(value, blocks, setBlocks));
+  const blocksComp = blocks.map((value) => <BlockComponent curBlock={value} blocks={blocks} setBlocks={setBlocks} />);
 
   return (
     <div>
@@ -277,22 +440,26 @@ function BlockTableComp() {
   );
 }
 
-function BlockComponent(
-  curBlock: BlockSite,
-  blocks: BlockSite[],
-  setBlocks: React.Dispatch<React.SetStateAction<BlockSite[]>>,
-) {
+interface BlockComponentProps {
+  curBlock: BlockSite;
+  blocks: BlockSite[];
+  setBlocks: React.Dispatch<React.SetStateAction<BlockSite[]>>;
+}
+function BlockComponent(props: BlockComponentProps) {
   return (
-    <tr className="border-b border-gray-500" key={curBlock.domain + '/' + curBlock.path}>
+    <tr className="border-b border-gray-500" key={props.curBlock.domain + '/' + props.curBlock.path}>
       <td>
         <div className="flex px-6 py-4">
-          <img className="mr-2" src={'http://www.google.com/s2/favicons?domain=' + curBlock.domain} />
-          <span className="underline hover:text-gray-700">{curBlock.domain}</span>
+          <img className="mr-2" src={'http://www.google.com/s2/favicons?domain=' + props.curBlock.domain} />
+          <span className="underline hover:text-gray-700">{props.curBlock.domain}</span>
         </div>
       </td>
-      <td className="px-6 py-4">{curBlock.path}</td>
+      <td className="px-6 py-4">{props.curBlock.path}</td>
       <td>
-        <button className="bg-inherit border-none" onClick={() => deleteBlockedSite(curBlock, blocks, setBlocks)}>
+        <button
+          className="bg-inherit border-none"
+          onClick={() => deleteBlockedSite(props.curBlock, props.blocks, props.setBlocks)}
+        >
           <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
             <span>Remove</span>
           </div>
@@ -355,9 +522,6 @@ function addBlockedSite(
   const nextBlocks = blocks.slice();
   nextBlocks.unshift(newBlock);
 
-  console.log(blocks);
-  console.log(nextBlocks);
-
   chrome.storage.sync.set({ blocks: nextBlocks }, function () {
     const error = chrome.runtime.lastError;
     if (error) {
@@ -406,4 +570,39 @@ function clearErrors(types: string[]) {
   for (const message of errorMessages) {
     message.style.display = 'none';
   }
+}
+
+// -- GENERAL POPUPS --
+
+interface PopupProps {
+  title: string;
+  popupBool: boolean;
+  setPopupBool: React.Dispatch<React.SetStateAction<boolean>>;
+  children: ReactNode;
+}
+function PopupComp(props: PopupProps) {
+  return props.popupBool ? (
+    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-500 bg-opacity-50 font-sans font-normal">
+      <div className="relative p-8 pb-4 w-2/5 rounded-md bg-gray-300 overflow-auto">
+        <div className="absolute top-0 left-0 w-full rounded-t-md bg-gray-400">
+          <span className="flex text-lg text-gray-800 font-semibold ml-4 my-2">{props.title}</span>
+          <div className={'border-gray-500 border'}></div>
+        </div>
+        <div className="absolute top-0 right-0">
+          <div className="m-2">
+            <div className="bg-gray-500 hover:bg-gray-600 rounded-full">
+              <div className="m-1">
+                <button onClick={() => props.setPopupBool(false)} className="text-gray-800">
+                  <FontAwesomeIcon icon={faX} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-6">{props.children}</div>
+      </div>
+    </div>
+  ) : (
+    ''
+  );
 }

@@ -72,10 +72,6 @@ function checkIndividualSession(sesh: Session): { inSesh: boolean; end: Date } {
   const start = new Date(parseInt(sesh.start));
   const end = new Date(parseInt(sesh.end));
 
-  // Temporary
-  start.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
-  end.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
-
   return { inSesh: now >= start && now <= end, end: end };
 }
 

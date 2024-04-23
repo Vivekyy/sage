@@ -7,4 +7,6 @@ export type BlockSite = {
 export type Session = {
   start: string;
   end: string;
+  repeat: string;
+  exceptions: string[];
 };
