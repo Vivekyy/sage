@@ -9,4 +9,6 @@ export type Session = {
   end: string;
   repeat: string;
   exceptions: string[];
+  name: string;
+  deck: string;
 };

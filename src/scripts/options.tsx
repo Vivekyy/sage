@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import { BlockSite, Session } from './types';
 import { checkIndividualSession } from './utils';
 
+const HOUR_HEIGHT = 40;
+
 const root = createRoot(document.getElementById('optionsApp')!);
 
 function onLoad() {
@@ -27,7 +29,7 @@ function OptionsContent() {
       </nav>
 
       <p id="general-error" className="text-red-600"></p>
-      <SessionCalenderComp />
+      <SessionCalendarComp />
       <BlockTableComp />
     </div>
   );
@@ -35,7 +37,7 @@ function OptionsContent() {
 
 // -- CALENDAR --
 
-function SessionCalenderComp() {
+function SessionCalendarComp() {
   const [sessions, setSessions] = useState(Array(0));
   const [week, setWeek] = useState(0);
   const [popupBool, setPopupBool] = useState(false);
@@ -50,7 +52,8 @@ function SessionCalenderComp() {
     }
   });
 
-  const seshComp = <div></div>;
+  const seshBucket = SessionBucket(week, sessions, setSessions);
+  const seshComp = seshBucket.map((value) => <div>{value}</div>);
 
   return (
     <div>
@@ -61,15 +64,15 @@ function SessionCalenderComp() {
       <div className="w-screen flex justify-center">
         <div className="rounded-md overflow-hidden w-4/5">
           <div className="text-sm text-left font-sans font-normal">
-            <CalenderHeaderComp week={week} />
+            <CalendarHeaderComp week={week} />
 
             <div className="overflow-auto h-96">
-              <div className="bg-gray-200">
-                <div className="grid grid-cols-8 grid-rows-auto auto-cols-min">
-                  <HourLineComp week={week} />
+              <div className="bg-gray-200 block relative top-0 left-0 w-full">
+                <div className="grid grid-cols-8 auto-cols-min">
                   <CalendarSidebarComp />
                   {seshComp}
                 </div>
+                <HourLineComp week={week} />
               </div>
             </div>
           </div>
@@ -85,7 +88,7 @@ function SessionCalenderComp() {
 interface CalendarHeaderProps {
   week: number;
 }
-function CalenderHeaderComp(props: CalendarHeaderProps) {
+function CalendarHeaderComp(props: CalendarHeaderProps) {
   const dow = getDow(props.week);
 
   return (
@@ -189,12 +192,30 @@ interface AddPopupProps {
   setPopupBool: React.Dispatch<React.SetStateAction<boolean>>;
 }
 function AddPopupComp(props: AddPopupProps) {
+  const [name, setName] = useState('');
+  const [deck, setDeck] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [repeat, setRepeat] = useState('');
 
   return (
     <PopupComp title="Add a Study Session" popupBool={props.popupBool} setPopupBool={props.setPopupBool}>
+      <div className="py-2">
+        <span>Session Name: </span>
+        <input
+          onChange={(e) => setName(e.target.value)}
+          type="text"
+          className="bg-gray-300 p-2 border-b-2 border-gray-500 rounded-sm outline-none focus:bg-gray-200"
+        ></input>
+      </div>
+      <div className="py-2">
+        <span>Deck Name: </span>
+        <input
+          onChange={(e) => setDeck(e.target.value)}
+          type="text"
+          className="bg-gray-300 p-2 border-b-2 border-gray-500 rounded-sm outline-none focus:bg-gray-200"
+        ></input>
+      </div>
       <span className="whitespace-nowrap py-2">
         <span>Session Start: </span>
         <input
@@ -224,7 +245,11 @@ function AddPopupComp(props: AddPopupProps) {
         </span>
       </div>
       <div className="pt-3">
-        <button onClick={() => addSession(start, end, repeat, props.sessions, props.setSessions, props.setPopupBool)}>
+        <button
+          onClick={() =>
+            addSession(name, deck, start, end, repeat, props.sessions, props.setSessions, props.setPopupBool)
+          }
+        >
           <div className="flex bg-blue-300 hover:bg-blue-500 py-1 px-3 rounded-full">
             <span className="text-gray-800 font-sans font-semibold">Add to Schedule</span>
           </div>
@@ -236,6 +261,8 @@ function AddPopupComp(props: AddPopupProps) {
 }
 
 function addSession(
+  name: string,
+  deck: string,
   startStr: string,
   endStr: string,
   repeatStr: string,
@@ -266,6 +293,8 @@ function addSession(
   }
 
   const newSesh: Session = {
+    name: name,
+    deck: deck,
     start: start!.getTime().toString(),
     end: end!.getTime().toString(),
     repeat: repeatStr,
@@ -300,11 +329,9 @@ function addSession(
   });
 }
 
-// -- CURRENT TIME LINE --
+// -- HOUR LINE --
 
 // Workaround with styled components due to tailwind bugs
-
-const HOUR_HEIGHT = 40;
 
 const HourHeightDiv = styled.div`
   height: ${HOUR_HEIGHT}px;
@@ -321,11 +348,12 @@ function HourBlockComp(time: string, id: number) {
 }
 
 interface HourLinePosProps {
-  offset: string;
+  offset: number;
 }
 const HourLinePosDiv = styled.div<HourLinePosProps>`
-  position: relative;
-  top: ${(p) => p.offset}px;
+  position: absolute;
+  top: ${(p) => (p.offset - HOUR_HEIGHT * 24).toString()}px;
+  width: 100%;
 `;
 
 interface HourLineProps {
@@ -346,12 +374,201 @@ function HourLineComp(props: HourLineProps) {
   const hourLineOffset = (hr + min / 60) * HOUR_HEIGHT + 12; //12 px offset for half of the text line height (default 24)
 
   return (
-    <div className="col-start-1 col-end-9">
-      <HourLinePosDiv offset={hourLineOffset.toString()}>
-        <div className={'border-red-500 border'}></div>
+    <div className="relative top-0 left-0 w-full h-0">
+      {/* <div className="col-start-1 col-end-9"> */}
+      <HourLinePosDiv offset={hourLineOffset}>
+        <div className={'border-red-500 border w-full'}></div>
       </HourLinePosDiv>
+      {/* </div> */}
     </div>
   );
+}
+
+// -- SESSIONS --
+
+function SessionBucket(
+  week: number,
+  sessions: Session[],
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+) {
+  const sortedSeshEles = Array(7)
+    .fill(null)
+    .map(() => Array(0));
+
+  // TODO: Handle overflow events that go past midnight
+  let i = 0;
+  for (const session of sessions) {
+    i += 1;
+    const start = new Date(parseInt(session.start));
+    // const end = new Date(parseInt(session.end));
+
+    const startDow = start.getDay() ? start.getDay() - 1 : 6;
+
+    sortedSeshEles[startDow].push(
+      <SessionComp week={week} session={session} sessions={sessions} setSessions={setSessions} key={i} />,
+    );
+  }
+
+  return sortedSeshEles;
+}
+
+interface SessionPosProps {
+  offset: number;
+  height: number;
+}
+const SessionPosDiv = styled.div<SessionPosProps>`
+  position: absolute;
+  top: ${(p) => p.offset.toString()}px;
+  height: ${(p) => p.height.toString()}px;
+  width: 12.5%;
+`;
+
+interface SessionSpanProps {
+  height: number;
+}
+const SessionSpan = styled.span<SessionSpanProps>`
+  line-height: ${(p) => p.height.toString()}px;
+  font-size: ${(p) => (p.height * 0.75).toString()}px;
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
+`;
+
+interface SessionProps {
+  week: number;
+  session: Session;
+  sessions: Session[];
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
+}
+function SessionComp(props: SessionProps) {
+  const [seshPopup, setSeshPopup] = useState(false);
+
+  const start = new Date(parseInt(props.session.start));
+  const end = new Date(parseInt(props.session.end));
+
+  const startHr = start.getHours();
+  const startMin = start.getMinutes();
+  const startOffset = (startHr + startMin / 60) * HOUR_HEIGHT + 12;
+
+  const endHr = end.getHours();
+  const endMin = end.getMinutes();
+  const seshHeight = (endHr + endMin / 60) * HOUR_HEIGHT + 12 - startOffset;
+
+  let spanHeight = seshHeight * 0.8;
+  if (spanHeight > 16) {
+    spanHeight = 16;
+  }
+
+  let deleteButtons = <div></div>;
+  if (props.session.repeat) {
+    const exception = getSunday(props.week);
+    exception.setDate(exception.getDate() + start.getDay() ? start.getDay() : 7);
+    exception.setTime(start.getTime());
+
+    deleteButtons = (
+      <div>
+        <button
+          className="bg-inherit border-none"
+          onClick={() => addException(exception, props.session, props.sessions, props.setSessions)}
+        >
+          <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
+            <span>Remove Once</span>
+          </div>
+        </button>
+        <button
+          className="bg-inherit border-none"
+          onClick={() => deleteSession(props.session, props.sessions, props.setSessions)}
+        >
+          <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
+            <span>Remove All</span>
+          </div>
+        </button>
+      </div>
+    );
+  } else {
+    deleteButtons = (
+      <div>
+        <button
+          className="bg-inherit border-none"
+          onClick={() => deleteSession(props.session, props.sessions, props.setSessions)}
+        >
+          <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
+            <span>Remove</span>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <SessionPosDiv
+        offset={startOffset}
+        height={seshHeight}
+        className={
+          'border-green-500 border rounded-md bg-green-300 bg-opacity-50 hover:bg-green-400 hover:bg-opacity-70'
+        }
+      >
+        <button onClick={() => setSeshPopup(true)}>
+          <div className="absolute w-full h-full left-0 top-0">
+            <SessionSpan height={spanHeight} className="font-sans font-normal text-slate-700">
+              {props.session.name}
+            </SessionSpan>
+          </div>
+        </button>
+      </SessionPosDiv>
+      <PopupComp title={props.session.name} popupBool={seshPopup} setPopupBool={setSeshPopup}>
+        <div>Deck: {props.session.deck ? props.session.deck : 'N/A'}</div>
+        <div>
+          Time: {start.toLocaleDateString('en-US', { weekday: 'long', month: 'numeric', day: 'numeric' })} at{' '}
+          {start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} -{' '}
+          {end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+        </div>
+        {deleteButtons}
+      </PopupComp>
+    </div>
+  );
+}
+
+function deleteSession(
+  curSession: Session,
+  sessions: Session[],
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+) {
+  const nextSessions = sessions.filter(function (session) {
+    return session.start != curSession.start;
+  });
+
+  chrome.storage.sync.set({ sessions: nextSessions }, function () {
+    const error = chrome.runtime.lastError;
+    if (error) {
+      console.error('Failed to remove session:', error);
+      outputError('#session-error', 'Failed to delete session, please try again');
+    } else {
+      setSessions(nextSessions);
+    }
+  });
+}
+
+function addException(
+  exception: Date,
+  curSession: Session,
+  sessions: Session[],
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+) {
+  const nextSessions = sessions.slice();
+  const seshId = nextSessions.findIndex((value) => value.start == curSession.start);
+  nextSessions[seshId].exceptions.push(exception.getTime().toString());
+
+  chrome.storage.sync.set({ sessions: nextSessions }, function () {
+    const error = chrome.runtime.lastError;
+    if (error) {
+      console.error('Failed to edit sessions:', error);
+      outputError('#session-error', 'Failed to edit sessions, please try again');
+    } else {
+      setSessions(nextSessions);
+    }
+  });
 }
 
 // -- BLOCK TABLE --
@@ -371,7 +588,7 @@ function BlockTableComp() {
     }
   });
 
-  const blocksComp = blocks.map((value) => <BlockComponent curBlock={value} blocks={blocks} setBlocks={setBlocks} />);
+  const blocksComp = blocks.map((value) => <BlockComp curBlock={value} blocks={blocks} setBlocks={setBlocks} />);
 
   return (
     <div>
@@ -427,12 +644,12 @@ function BlockTableComp() {
   );
 }
 
-interface BlockComponentProps {
+interface BlockProps {
   curBlock: BlockSite;
   blocks: BlockSite[];
   setBlocks: React.Dispatch<React.SetStateAction<BlockSite[]>>;
 }
-function BlockComponent(props: BlockComponentProps) {
+function BlockComp(props: BlockProps) {
   return (
     <tr className="border-b border-gray-500" key={props.curBlock.domain + '/' + props.curBlock.path}>
       <td>
@@ -569,7 +786,7 @@ interface PopupProps {
 }
 function PopupComp(props: PopupProps) {
   return props.popupBool ? (
-    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-500 bg-opacity-50 font-sans font-normal">
+    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-500 bg-opacity-50 font-sans font-normal z-10">
       <div className="relative p-8 pb-4 w-2/5 rounded-md bg-gray-300 overflow-auto">
         <div className="absolute top-0 left-0 w-full rounded-t-md bg-gray-400">
           <span className="flex text-lg text-gray-800 font-semibold ml-4 my-2">{props.title}</span>
@@ -596,10 +813,16 @@ function PopupComp(props: PopupProps) {
 
 // -- UTILS --
 
-function getDow(week: number) {
+function getSunday(week: number) {
   const dt = new Date();
   const sunday = new Date();
   sunday.setDate(dt.getDate() - dt.getDay() + 7 * week);
+
+  return sunday;
+}
+
+function getDow(week: number) {
+  const sunday = getSunday(week);
 
   const dow = [];
   for (let i = 1; i < 8; i++) {
