@@ -16,7 +16,7 @@ export function checkSession() {
         }
 
         for (const sesh of value.sessions) {
-          const { inSesh: inSesh } = checkIndividualSession(sesh);
+          const inSesh = checkIndividualSession(new Date(), sesh);
           if (inSesh) {
             resolve('true');
           }
@@ -41,7 +41,8 @@ export function countdown(listener: CallableFunction) {
       sessions = value.sessions;
 
       for (const sesh of sessions) {
-        const { inSesh: inSesh, end: end } = checkIndividualSession(sesh);
+        const inSesh = checkIndividualSession(new Date(), sesh);
+        const end = new Date(parseInt(sesh.end));
         const diff = (end.getTime() - now.getTime()) / 1000; //Seconds remaining
 
         if (inSesh && diff > 0) {
@@ -65,14 +66,12 @@ export function countdown(listener: CallableFunction) {
   );
 }
 
-// Will need to be updated for calendar and pomodoro changes
-function checkIndividualSession(sesh: Session): { inSesh: boolean; end: Date } {
-  const now = new Date();
-
+// TODO: Update for repeat and pomodoro
+export function checkIndividualSession(check: Date, sesh: Session) {
   const start = new Date(parseInt(sesh.start));
   const end = new Date(parseInt(sesh.end));
 
-  return { inSesh: now >= start && now <= end, end: end };
+  return check >= start && check <= end;
 }
 
 export function toAMPM(date: Date) {

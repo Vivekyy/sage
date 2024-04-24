@@ -8,6 +8,7 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 
 import { BlockSite, Session } from './types';
+import { checkIndividualSession } from './utils';
 
 const root = createRoot(document.getElementById('optionsApp')!);
 
@@ -85,16 +86,7 @@ interface CalendarHeaderProps {
   week: number;
 }
 function CalenderHeaderComp(props: CalendarHeaderProps) {
-  const dt = new Date();
-  const sunday = new Date();
-  sunday.setDate(dt.getDate() - dt.getDay() + 7 * props.week);
-
-  const dow = [];
-  for (let i = 1; i < 8; i++) {
-    const day = new Date(sunday.getTime());
-    day.setDate(day.getDate() + i);
-    dow.push(day);
-  }
+  const dow = getDow(props.week);
 
   return (
     <div className="text-gray-800 bg-gray-500">
@@ -232,11 +224,7 @@ function AddPopupComp(props: AddPopupProps) {
         </span>
       </div>
       <div className="pt-3">
-        <button
-          onClick={() =>
-            addSession(props.sessions, props.popupBool, start, end, repeat, props.setSessions, props.setPopupBool)
-          }
-        >
+        <button onClick={() => addSession(start, end, repeat, props.sessions, props.setSessions, props.setPopupBool)}>
           <div className="flex bg-blue-300 hover:bg-blue-500 py-1 px-3 rounded-full">
             <span className="text-gray-800 font-sans font-semibold">Add to Schedule</span>
           </div>
@@ -248,11 +236,10 @@ function AddPopupComp(props: AddPopupProps) {
 }
 
 function addSession(
-  sessions: Session[],
-  popupBool: boolean,
   startStr: string,
   endStr: string,
   repeatStr: string,
+  sessions: Session[],
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
   setPopupBool: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
@@ -285,13 +272,13 @@ function addSession(
     exceptions: [],
   };
 
-  // TODO: Handle repeat logic here
   // Enforce no overlapping sessions
   if (
     sessions.some(function (session) {
       return (
-        (session.start <= newSesh.start && session.end >= newSesh.start) ||
-        (session.start <= newSesh.end && session.end >= newSesh.end)
+        checkIndividualSession(new Date(parseInt(newSesh.start)), session) ||
+        checkIndividualSession(new Date(parseInt(newSesh.end)), session) ||
+        checkIndividualSession(new Date(parseInt(session.start)), newSesh)
       );
     })
   ) {
@@ -605,4 +592,21 @@ function PopupComp(props: PopupProps) {
   ) : (
     ''
   );
+}
+
+// -- UTILS --
+
+function getDow(week: number) {
+  const dt = new Date();
+  const sunday = new Date();
+  sunday.setDate(dt.getDate() - dt.getDay() + 7 * week);
+
+  const dow = [];
+  for (let i = 1; i < 8; i++) {
+    const day = new Date(sunday.getTime());
+    day.setDate(day.getDate() + i);
+    dow.push(day);
+  }
+
+  return dow;
 }
