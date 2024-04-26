@@ -232,16 +232,46 @@ function AddPopupComp(props: AddPopupProps) {
           className="bg-gray-300 p-2 border-b-2 border-gray-500 rounded-sm outline-none focus:bg-gray-200"
         />
       </span>
-      <div className="py-2">
-        <span>
-          Repeat Every{' '}
-          <input
-            onChange={(e) => setRepeat(e.target.value)}
-            type="number"
-            min="1"
-            className="bg-gray-300 p-2 border-b-2 w-10 border-gray-500 rounded-sm outline-none focus:bg-gray-200"
-          />{' '}
-          Days
+      <div className="py-2 pt-6">
+        <span className="whitespace-nowrap">
+          <ul className="grid grid-cols-4 w-max font-sans font-medium">
+            <li>
+              <input id="none" type="radio" name="repeat" onClick={() => setRepeat('')} className="hidden peer" />
+              <label
+                htmlFor="none"
+                className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 rounded-l-lg cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
+              >
+                One Time
+              </label>
+            </li>
+            <li>
+              <input id="daily" type="radio" name="repeat" onClick={() => setRepeat('1')} className="hidden peer" />
+              <label
+                htmlFor="daily"
+                className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
+              >
+                Daily
+              </label>
+            </li>
+            <li>
+              <input id="weekly" type="radio" name="repeat" onClick={() => setRepeat('7')} className="hidden peer" />
+              <label
+                htmlFor="weekly"
+                className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
+              >
+                Weekly
+              </label>
+            </li>
+            <li>
+              <input id="biweekly" type="radio" name="repeat" onClick={() => setRepeat('14')} className="hidden peer" />
+              <label
+                htmlFor="biweekly"
+                className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 rounded-r-lg cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
+              >
+                Bi-weekly
+              </label>
+            </li>
+          </ul>
         </span>
       </div>
       <div className="pt-3">
@@ -274,6 +304,10 @@ function addSession(
 
   clearErrors(['#session-error']);
 
+  if (!name) {
+    outputError('#session-error', 'Must input a name for your study session');
+    return;
+  }
   if (!startStr) {
     outputError('#session-error', 'Must input a start time');
     return;
