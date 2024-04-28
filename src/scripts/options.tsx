@@ -10,7 +10,8 @@ import styled from 'styled-components';
 import { BlockSite, Session } from './types';
 import { checkIndividualSession } from './utils';
 
-const HOUR_HEIGHT = 40;
+const HOUR_HEIGHT = 80;
+const DAY_MILIS = 1000 * 3600 * 24;
 
 const root = createRoot(document.getElementById('optionsApp')!);
 
@@ -53,7 +54,7 @@ function SessionCalendarComp() {
   });
 
   const seshBucket = SessionBucket(week, sessions, setSessions);
-  const seshComp = seshBucket.map((value) => <div>{value}</div>);
+  const seshComp = seshBucket.map((value, idx) => <div key={idx}>{value}</div>);
 
   return (
     <div>
@@ -245,16 +246,13 @@ function AddPopupComp(props: AddPopupProps) {
               </label>
             </li>
             <li>
-              <input id="daily" type="radio" name="repeat" onClick={() => setRepeat('1')} className="hidden peer" />
-              <label
-                htmlFor="daily"
-                className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
-              >
-                Daily
-              </label>
-            </li>
-            <li>
-              <input id="weekly" type="radio" name="repeat" onClick={() => setRepeat('7')} className="hidden peer" />
+              <input
+                id="weekly"
+                type="radio"
+                name="repeat"
+                onClick={() => setRepeat('Weekly')}
+                className="hidden peer"
+              />
               <label
                 htmlFor="weekly"
                 className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
@@ -263,12 +261,18 @@ function AddPopupComp(props: AddPopupProps) {
               </label>
             </li>
             <li>
-              <input id="biweekly" type="radio" name="repeat" onClick={() => setRepeat('14')} className="hidden peer" />
+              <input
+                id="biweekly"
+                type="radio"
+                name="repeat"
+                onClick={() => setRepeat('Biweekly')}
+                className="hidden peer"
+              />
               <label
                 htmlFor="biweekly"
                 className="inline-flex items-center justify-center w-full p-2 text-gray-800 bg-gray-400 border border-gray-600 rounded-r-lg cursor-pointer peer-checked:bg-gray-600 hover:bg-gray-500"
               >
-                Bi-weekly
+                Biweekly
               </label>
             </li>
           </ul>
@@ -371,7 +375,21 @@ const HourHeightDiv = styled.div`
   height: ${HOUR_HEIGHT}px;
 `;
 
+// Special case for 11 PM to account for usual text offset
+const HourHeight11Div = styled.div`
+  height: ${HOUR_HEIGHT + 12}px;
+`;
+
 function HourBlockComp(time: string, id: number) {
+  if (time == '11:00 PM') {
+    return (
+      <div key={id}>
+        <HourHeight11Div>
+          <div className="flex justify-end mr-4">{time}</div>
+        </HourHeight11Div>
+      </div>
+    );
+  }
   return (
     <div key={id}>
       <HourHeightDiv>
@@ -475,6 +493,10 @@ interface SessionProps {
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
 }
 function SessionComp(props: SessionProps) {
+  if (!checkSessionDisplay(props.week, props.session)) {
+    return <div></div>;
+  }
+
   const [seshPopup, setSeshPopup] = useState(false);
 
   const start = new Date(parseInt(props.session.start));
@@ -486,7 +508,12 @@ function SessionComp(props: SessionProps) {
 
   const endHr = end.getHours();
   const endMin = end.getMinutes();
-  const seshHeight = (endHr + endMin / 60) * HOUR_HEIGHT + 12 - startOffset;
+  let seshHeight = (endHr + endMin / 60) * HOUR_HEIGHT + 12 - startOffset;
+
+  // Fix midnight edge case
+  if (endHr == 0 && endMin == 0) {
+    seshHeight = HOUR_HEIGHT * 24 + 12 - startOffset;
+  }
 
   let spanHeight = seshHeight * 0.8;
   if (spanHeight > 16) {
@@ -496,14 +523,17 @@ function SessionComp(props: SessionProps) {
   let deleteButtons = <div></div>;
   if (props.session.repeat) {
     const exception = getSunday(props.week);
-    exception.setDate(exception.getDate() + start.getDay() ? start.getDay() : 7);
-    exception.setTime(start.getTime());
+    exception.setDate(exception.getDate() + start.getDay());
+    if (start.getDay() == 0) {
+      exception.setDate(exception.getDate() + 7);
+    }
+    exception.setHours(start.getHours(), start.getMinutes(), start.getSeconds(), start.getMilliseconds());
 
     deleteButtons = (
       <div>
         <button
-          className="bg-inherit border-none"
-          onClick={() => addException(exception, props.session, props.sessions, props.setSessions)}
+          className="bg-inherit border-none pr-2"
+          onClick={() => addException(exception, props.session, props.sessions, props.setSessions, setSeshPopup)}
         >
           <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
             <span>Remove Once</span>
@@ -511,10 +541,10 @@ function SessionComp(props: SessionProps) {
         </button>
         <button
           className="bg-inherit border-none"
-          onClick={() => deleteSession(props.session, props.sessions, props.setSessions)}
+          onClick={() => deleteSession(props.session, props.sessions, props.setSessions, setSeshPopup)}
         >
           <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
-            <span>Remove All</span>
+            <span>Remove All Occurences</span>
           </div>
         </button>
       </div>
@@ -524,7 +554,7 @@ function SessionComp(props: SessionProps) {
       <div>
         <button
           className="bg-inherit border-none"
-          onClick={() => deleteSession(props.session, props.sessions, props.setSessions)}
+          onClick={() => deleteSession(props.session, props.sessions, props.setSessions, setSeshPopup)}
         >
           <div className="flex bg-red-400 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded-full">
             <span>Remove</span>
@@ -558,16 +588,61 @@ function SessionComp(props: SessionProps) {
           {start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} -{' '}
           {end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
         </div>
+        <div className="pb-3">Repeat: {props.session.repeat ? props.session.repeat : 'None'}</div>
         {deleteButtons}
       </PopupComp>
     </div>
   );
 }
 
+function checkSessionDisplay(week: number, session: Session) {
+  const start = new Date(parseInt(session.start));
+  // const end = new Date(parseInt(session.end));
+
+  const monday = getSunday(week);
+  monday.setDate(monday.getDate() + 1);
+
+  if (!session.repeat) {
+    if (start > monday && start.getTime() - monday.getTime() < 7 * DAY_MILIS) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (session.repeat == 'Weekly') {
+    if (start.getTime() < monday.getTime() + 7 * DAY_MILIS) {
+      const diff = monday.getTime() + 7 * DAY_MILIS - start.getTime();
+      const weeksoff = diff / (7 * DAY_MILIS);
+      start.setDate(start.getDate() + 7 * weeksoff);
+      if (session.exceptions.some((e) => e == start.getTime().toString())) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    //Biweekly
+    if (start.getTime() < monday.getTime() + 7 * DAY_MILIS) {
+      const diff = monday.getTime() + 7 * DAY_MILIS - start.getTime();
+      const weeksoff = Math.floor(diff / (7 * DAY_MILIS));
+      start.setDate(start.getDate() + 7 * weeksoff);
+      if (weeksoff % 2 != 0 || session.exceptions.some((e) => e == start.getTime().toString())) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
+}
+
 function deleteSession(
   curSession: Session,
   sessions: Session[],
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+  setSeshPopup: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
   const nextSessions = sessions.filter(function (session) {
     return session.start != curSession.start;
@@ -579,6 +654,7 @@ function deleteSession(
       console.error('Failed to remove session:', error);
       outputError('#session-error', 'Failed to delete session, please try again');
     } else {
+      setSeshPopup(false);
       setSessions(nextSessions);
     }
   });
@@ -589,7 +665,10 @@ function addException(
   curSession: Session,
   sessions: Session[],
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+  setSeshPopup: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
+  console.log(exception);
+
   const nextSessions = sessions.slice();
   const seshId = nextSessions.findIndex((value) => value.start == curSession.start);
   nextSessions[seshId].exceptions.push(exception.getTime().toString());
@@ -600,6 +679,7 @@ function addException(
       console.error('Failed to edit sessions:', error);
       outputError('#session-error', 'Failed to edit sessions, please try again');
     } else {
+      setSeshPopup(false);
       setSessions(nextSessions);
     }
   });
@@ -851,6 +931,11 @@ function getSunday(week: number) {
   const dt = new Date();
   const sunday = new Date();
   sunday.setDate(dt.getDate() - dt.getDay() + 7 * week);
+  // Get current week instead of following week on sundays
+  if (dt.getDay() == 0) {
+    sunday.setDate(sunday.getDate() - 7);
+  }
+  sunday.setHours(0, 0, 0, 0);
 
   return sunday;
 }
