@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight, faX } from '@fortawesome/free-solid-svg-icons';
 
 import { createRoot } from 'react-dom/client';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useRef, useEffect } from 'react';
 
 import styled from 'styled-components';
 
@@ -322,7 +322,6 @@ function addSession(
 
   const start = new Date(startStr);
   const end = new Date(endStr);
-  // const repeat = repeatStr ? Number(repeatStr) : 0;
 
   if (start >= end) {
     outputError('#session-error', 'Start time must be earlier than end time');
@@ -443,6 +442,17 @@ function HourLineComp(props: HourLineProps) {
     );
   }
 
+  const hourLineRef = useRef<HTMLDivElement>(null);
+
+  function scrollHourLine() {
+    const { current } = hourLineRef;
+    if (current !== null) {
+      current!.scrollIntoView({ behavior: 'instant', block: 'center' });
+    }
+  }
+
+  useEffect(scrollHourLine, []);
+
   const dt = new Date();
   const hr = dt.getHours();
   const min = dt.getMinutes();
@@ -450,11 +460,9 @@ function HourLineComp(props: HourLineProps) {
 
   return (
     <div className="relative top-0 left-0 w-full h-0">
-      {/* <div className="col-start-1 col-end-9"> */}
       <HourLinePosDiv offset={hourLineOffset}>
-        <div className={'border-red-500 border w-full'}></div>
+        <div className={'border-red-500 border w-full'} ref={hourLineRef}></div>
       </HourLinePosDiv>
-      {/* </div> */}
     </div>
   );
 }
