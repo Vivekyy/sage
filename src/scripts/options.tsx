@@ -8,10 +8,9 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 
 import { BlockSite, Session } from './types';
-import { checkIndividualSession } from './utils';
+import { checkIndividualSession, DAY_MILIS } from './utils';
 
 const HOUR_HEIGHT = 80;
-const DAY_MILIS = 1000 * 3600 * 24;
 
 const root = createRoot(document.getElementById('optionsApp')!);
 
@@ -342,10 +341,34 @@ function addSession(
   // Enforce no overlapping sessions
   if (
     sessions.some(function (session) {
+      // Handle edge case of adding a session that surrounds the repeat of an existing session
+      const startCheck = new Date(parseInt(session.start));
+      const newStart = new Date(parseInt(newSesh.start));
+      if (session.repeat == 'Weekly') {
+        if (newStart > startCheck) {
+          const diff = newStart.getTime() - startCheck.getTime();
+          const weeksoff = Math.ceil(diff / (DAY_MILIS * 7));
+          startCheck.setDate(startCheck.getDate() + 7 * weeksoff);
+        }
+      } else if (session.repeat == 'Biweekly') {
+        if (newStart > startCheck) {
+          const diff = newStart.getTime() - startCheck.getTime();
+          const biweeksoff = Math.ceil(diff / (DAY_MILIS * 14));
+          startCheck.setDate(startCheck.getDate() + 14 * biweeksoff);
+        }
+      }
+
+      // console.log(newSesh);
+      // console.log(startCheck);
+
+      // console.log(checkIndividualSession(new Date(parseInt(newSesh.start)), session));
+      // console.log(checkIndividualSession(new Date(parseInt(newSesh.end)), session));
+      // console.log(checkIndividualSession(startCheck, newSesh));
+
       return (
         checkIndividualSession(new Date(parseInt(newSesh.start)), session) ||
         checkIndividualSession(new Date(parseInt(newSesh.end)), session) ||
-        checkIndividualSession(new Date(parseInt(session.start)), newSesh)
+        checkIndividualSession(startCheck, newSesh)
       );
     })
   ) {
@@ -611,7 +634,7 @@ function checkSessionDisplay(week: number, session: Session) {
   } else if (session.repeat == 'Weekly') {
     if (start.getTime() < monday.getTime() + 7 * DAY_MILIS) {
       const diff = monday.getTime() + 7 * DAY_MILIS - start.getTime();
-      const weeksoff = diff / (7 * DAY_MILIS);
+      const weeksoff = Math.floor(diff / (7 * DAY_MILIS));
       start.setDate(start.getDate() + 7 * weeksoff);
       if (session.exceptions.some((e) => e == start.getTime().toString())) {
         return false;

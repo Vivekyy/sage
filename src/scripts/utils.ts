@@ -1,5 +1,7 @@
 import { Session } from './types';
 
+export const DAY_MILIS = 1000 * 3600 * 24;
+
 let sessions: Session[] = [];
 
 export function checkSession() {
@@ -66,12 +68,42 @@ export function countdown(listener: CallableFunction) {
   );
 }
 
-// TODO: Update for repeat and pomodoro
 export function checkIndividualSession(check: Date, sesh: Session) {
   const start = new Date(parseInt(sesh.start));
   const end = new Date(parseInt(sesh.end));
 
-  return check >= start && check <= end;
+  if (check < start) {
+    return false;
+  }
+
+  if (!sesh.repeat) {
+    return check <= end;
+  } else if (sesh.repeat == 'Weekly') {
+    const diff = check.getTime() - start.getTime();
+    if (diff % (7 * DAY_MILIS) < end.getTime() - start.getTime()) {
+      const curStart = check.getTime() - (diff % (7 * DAY_MILIS));
+      if (sesh.exceptions.some((e) => e == curStart.toString())) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    //Biweekly
+    const diff = check.getTime() - start.getTime();
+    if (diff % (14 * DAY_MILIS) < end.getTime() - start.getTime()) {
+      const curStart = check.getTime() - (diff % (7 * DAY_MILIS));
+      if (sesh.exceptions.some((e) => e == curStart.toString())) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
 }
 
 export function toAMPM(date: Date) {
